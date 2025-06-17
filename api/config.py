@@ -10,6 +10,8 @@ class Settings(BaseSettings):
         'extra': 'ignore',
     }
 
+    ALLOWED_HOST: list[str] = []
+
     DATABASE_NAME: str = 'postgres'
 
     DATABASE_USER: str = 'postgres'
