@@ -12,6 +12,11 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "antd": "^5.26.1",
+    "mobx": "^6.13.7",
+    "mobx-react-lite": "^4.1.0",
+    "mobx-react-observer": "^1.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
