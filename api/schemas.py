@@ -8,6 +8,12 @@ class ModelSchema(BaseModel):
     model_config = {'from_attributes': True, 'validate_by_alias': False}
 
 
+class PaginatedResponseSchema[T: ModelSchema](BaseModel):
+    results: list[T]
+    next: str | None
+    previous: str | None
+
+
 class BaseDataEntrySchema(ModelSchema):
     name: str
     version: str
