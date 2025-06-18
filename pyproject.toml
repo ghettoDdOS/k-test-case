@@ -21,6 +21,7 @@ dev = [
   "ruff>=0.12.0",
   "watchfiles>=1.1.0"
 ]
+fixtures = [ "mimesis>=18.0.0", ]
 
 [tool.ruff]
 line-length = 79

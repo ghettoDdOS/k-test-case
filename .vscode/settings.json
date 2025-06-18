@@ -41,5 +41,9 @@
     "scss",
     "pcss",
     "postcss"
-  ]
+  ],
+
+  "[python]": {
+    "editor.formatOnSave": true
+  }
 }

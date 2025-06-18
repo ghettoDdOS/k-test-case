@@ -167,6 +167,9 @@ dev = [
     { name = "ruff" },
     { name = "watchfiles" },
 ]
+fixtures = [
+    { name = "mimesis" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -186,6 +189,7 @@ dev = [
     { name = "ruff", specifier = ">=0.12.0" },
     { name = "watchfiles", specifier = ">=1.1.0" },
 ]
+fixtures = [{ name = "mimesis", specifier = ">=18.0.0" }]
 
 [[package]]
 name = "mako"
@@ -225,6 +229,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/80/0985960e4b89922cb5a0bac0ed39c5b96cbc1a536a99f30e8c220a996ed9/MarkupSafe-3.0.2-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:131a3c7689c85f5ad20f9f6fb1b866f402c445b220c19fe4308c0b147ccd2ad9", size = 24098, upload-time = "2024-10-18T15:21:40.813Z" },
     { url = "https://files.pythonhosted.org/packages/82/78/fedb03c7d5380df2427038ec8d973587e90561b2d90cd472ce9254cf348b/MarkupSafe-3.0.2-cp313-cp313t-win32.whl", hash = "sha256:ba8062ed2cf21c07a9e295d5b8a2a5ce678b913b45fdf68c32d95d6c1291e0b6", size = 15208, upload-time = "2024-10-18T15:21:41.814Z" },
     { url = "https://files.pythonhosted.org/packages/4f/65/6079a46068dfceaeabb5dcad6d674f5f5c61a6fa5673746f42a9f4c233b3/MarkupSafe-3.0.2-cp313-cp313t-win_amd64.whl", hash = "sha256:e444a31f8db13eb18ada366ab3cf45fd4b31e4db1236a4448f68778c1d1a5a2f", size = 15739, upload-time = "2024-10-18T15:21:42.784Z" },
+]
+
+[[package]]
+name = "mimesis"
+version = "18.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5d/f1/33fb02aa19271a5a2334d24a597047399744a3f1e8c97be31053887260b4/mimesis-18.0.0.tar.gz", hash = "sha256:7d7c76ecd680ae48afe8dc4413ef1ef1ee7ef20e16f9f9cb42892add642fc1b2", size = 4681287, upload-time = "2024-09-13T22:26:05.273Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b6/c8/0b91996ce5337bb877300d0a0e86df17ab72da573625348dcb6cd92c3c41/mimesis-18.0.0-py3-none-any.whl", hash = "sha256:a51854a5ce63ebf2bd6a98e8841412e04cede38593be7e16d1d712848e6273df", size = 4734674, upload-time = "2024-09-13T22:26:03.283Z" },
 ]
 
 [[package]]
