@@ -13,7 +13,7 @@ from api.schemas import (
 router = APIRouter(tags=['data_entry'])
 
 
-@router.get('/page_number_paginated')
+@router.get('/page-number-paginated')
 async def data_entry_page_number_paginated_list(
     service: DataEntryServiceDep,
     page_number_pagination: Annotated[

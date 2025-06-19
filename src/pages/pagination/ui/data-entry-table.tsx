@@ -1,13 +1,14 @@
-import type { TableColumnsType } from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
 import type { FC } from 'react'
 
 import type { DataEntry } from '@/app/entities/data-entry'
 
 import { Table } from 'antd'
+import { useState } from 'react'
 
-import { getDataEntryList } from '@/app/entities/data-entry'
 import { formatDateTime } from '@/shared/lib/date'
-import { useAsyncData } from '@/shared/lib/promise'
+
+import { DataEntryPageNumberPaginatedStore } from '../model'
 
 const columns: TableColumnsType<DataEntry> = [
   {
@@ -44,17 +45,31 @@ const columns: TableColumnsType<DataEntry> = [
 ]
 
 const DataEntryTable: FC = () => {
-  const { data, isLoading } = useAsyncData(async () => getDataEntryList())
+  const [store] = useState(() => new DataEntryPageNumberPaginatedStore())
+
+  const handleTableChange: TableProps<DataEntry>['onChange']
+  = (pagination) => {
+    if (pagination.current != null)
+      store.setPage(pagination.current)
+    if (pagination.pageSize != null)
+      store.setPageSize(pagination.pageSize)
+  }
 
   return (
     <Table
-      dataSource={data}
-      loading={isLoading}
+      dataSource={store.data}
       columns={columns}
       rowKey={row => row.id}
+      loading={store.loading}
+      pagination={{
+        current: store.page,
+        pageSize: store.pageSize,
+        total: store.count,
+      }}
       expandable={{
         expandedRowRender: row => <p>{row.desc}</p>,
       }}
+      onChange={handleTableChange}
     />
   )
 }
