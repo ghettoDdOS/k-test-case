@@ -1,3 +1,5 @@
+import { joinUrl } from './lib/url'
+
 interface RequestOptions {}
 
 interface ApiClient {
@@ -13,16 +15,6 @@ class ApiError extends Error {
     super(response.statusText)
     this.name = 'ApiError'
   }
-}
-
-function joinUrl(base: string, path: string) {
-  if (!base.endsWith('/') && !path.startsWith('/')) {
-    return `${base}/${path}`
-  }
-  if (base.endsWith('/') && path.startsWith('/')) {
-    return base + path.slice(1)
-  }
-  return base + path
 }
 
 function createApiClient(options: ApiClientOptions = {}): ApiClient {

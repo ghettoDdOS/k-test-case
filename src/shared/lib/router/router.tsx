@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react'
+import type { FC, PropsWithChildren, ReactNode } from 'react'
 
 import type { RouterContextValue } from './context'
 import type { Route } from './route'
@@ -12,9 +12,10 @@ interface RouterProps {
   routes: Route[]
   loading: ReactNode
   fallback: FC
+  layout: FC<PropsWithChildren>
 }
 
-const Router: FC<RouterProps> = ({ routes, fallback, loading }) => {
+const Router: FC<RouterProps> = ({ routes, fallback, loading, layout: Layout }) => {
   const [path, setPath] = useState(window.location.pathname)
 
   const Route = useMemo(() => {
@@ -23,6 +24,7 @@ const Router: FC<RouterProps> = ({ routes, fallback, loading }) => {
 
   const navigate = useCallback((path: string) => {
     window.history.pushState({}, '', path)
+    setPath(window.location.pathname)
   }, [])
 
   useEffect(() => {
@@ -43,9 +45,11 @@ const Router: FC<RouterProps> = ({ routes, fallback, loading }) => {
 
   return (
     <RouterContext value={api}>
-      <Suspense fallback={loading}>
-        <Route />
-      </Suspense>
+      <Layout>
+        <Suspense fallback={loading}>
+          <Route />
+        </Suspense>
+      </Layout>
     </RouterContext>
   )
 }

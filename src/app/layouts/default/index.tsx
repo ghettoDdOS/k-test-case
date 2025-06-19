@@ -2,7 +2,10 @@ import type { MenuProps } from 'antd'
 import type { FC, PropsWithChildren } from 'react'
 
 import { Layout, Menu } from 'antd'
-import { useState } from 'react'
+
+import { useRouter } from '@/shared/lib/router'
+
+import styles from './default.module.css'
 
 const { Header, Content } = Layout
 
@@ -18,18 +21,17 @@ const links: MenuProps['items'] = [
 ]
 
 const DefaultLayout: FC<PropsWithChildren> = ({ children }) => {
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([window.location.pathname])
+  const { location, navigate } = useRouter()
 
   const handleSelect: MenuProps['onSelect'] = ({ key }) => {
-    setSelectedKeys([key])
-    window.history.pushState({}, '', key)
+    navigate(key)
   }
 
   return (
-    <Layout>
+    <Layout className={styles.root}>
       <Header>
         <Menu
-          selectedKeys={selectedKeys}
+          selectedKeys={[location]}
           onSelect={handleSelect}
           theme="dark"
           mode="horizontal"

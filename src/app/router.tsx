@@ -2,12 +2,12 @@ import type { FC } from 'react'
 
 import type { Route } from '@/shared/lib/router'
 
-import { Button, Flex, Spin, Typography } from 'antd'
+import { Button, Result, Spin } from 'antd'
 import { lazy } from 'react'
 
 import { Router, useRouter } from '@/shared/lib/router'
 
-const { Title, Paragraph } = Typography
+import DefaultLayout from './layouts/default'
 
 const routes: Route[] = [
   {
@@ -24,11 +24,14 @@ const NotFoundPage: FC = () => {
   const { navigate } = useRouter()
 
   return (
-    <Flex vertical align="center">
-      <Title>404</Title>
-      <Paragraph>Страница не найдена</Paragraph>
-      <Button onClick={() => { navigate('/') }}>На главную</Button>
-    </Flex>
+    <Result
+      style={{ marginBlock: 'auto' }}
+      status="404"
+      title="404"
+      subTitle="Страница не найдена."
+      extra={<Button type="primary" onClick={() => { navigate('/') }}>На главную</Button>}
+    />
+
   )
 }
 
@@ -38,6 +41,7 @@ const AppRouter: FC = () => {
       routes={routes}
       loading={<Spin fullscreen />}
       fallback={NotFoundPage}
+      layout={DefaultLayout}
     />
   )
 }

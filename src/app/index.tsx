@@ -2,7 +2,6 @@ import type { FC } from 'react'
 
 import { StrictMode } from 'react'
 
-import DefaultLayout from './layouts/default'
 import AppProviders from './providers'
 import Router from './router'
 
@@ -12,9 +11,7 @@ const App: FC = () => {
   return (
     <StrictMode>
       <AppProviders>
-        <DefaultLayout>
-          <Router />
-        </DefaultLayout>
+        <Router />
       </AppProviders>
     </StrictMode>
   )
