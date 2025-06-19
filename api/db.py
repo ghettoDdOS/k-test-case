@@ -16,7 +16,9 @@ from sqlalchemy.orm import (
 
 from api.config import settings
 
-engine = create_async_engine(str(settings.DATABASE_URL))
+engine = create_async_engine(
+    str(settings.DATABASE_URL), echo=settings.QUERY_LOGGER
+)
 
 session_factory = async_sessionmaker(
     engine, expire_on_commit=False, autoflush=False

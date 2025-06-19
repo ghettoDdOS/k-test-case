@@ -1,16 +1,43 @@
-from collections.abc import Mapping, Sequence
-from typing import Any
+from fastapi import HTTPException, status
 
 from api.db import Model
+from api.pagination import PaginationError
 from api.repositories.base import Repository
+from api.schemas import (
+    ModelSchema,
+    PageNumberPaginatedResponseSchema,
+    PageNumberPaginationParamsSchema,
+)
 
 
-class DatabaseService[T: Model, R: Repository]:
-    def __init__(self, repository: R) -> None:
+class DatabaseService[T: Model]:
+    def __init__(self, repository: Repository[T]) -> None:
         self._repository = repository
 
-    async def list(self) -> Sequence[T]:
-        return await self._repository.list()
+    async def page_number_paginated_list[S: ModelSchema](
+        self,
+        schema: type[S],
+        pagination_params: PageNumberPaginationParamsSchema,
+    ) -> PageNumberPaginatedResponseSchema[S]:
+        try:
+            data = await self._repository.page_number_paginated_list(
+                page=pagination_params.page,
+                page_size=pagination_params.page_size,
+            )
+        except PaginationError as exc:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+        else:
+            return PageNumberPaginatedResponseSchema[S](
+                results=[
+                    schema.model_validate(item) for item in data['results']
+                ],
+                count=data['count'],
+                next=data['next'],
+                previous=data['previous'],
+            )
 
-    async def create(self, **kwargs: Mapping[str, Any]) -> T:
-        return await self._repository.create(**kwargs)
+    async def create[S: ModelSchema](
+        self, schema: type[S], model: ModelSchema
+    ) -> S:
+        instance = await self._repository.create(**model.model_dump())
+        return schema.model_validate(instance)

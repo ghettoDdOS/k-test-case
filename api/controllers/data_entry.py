@@ -1,21 +1,32 @@
-from collections.abc import Sequence
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from api.deps import DataEntryServiceDep
-from api.models import DataEntry
-from api.schemas import DataEntryCreateSchema, DataEntrySchema
+from api.schemas import (
+    DataEntryCreateSchema,
+    DataEntrySchema,
+    PageNumberPaginatedResponseSchema,
+    PageNumberPaginationParamsSchema,
+)
 
 router = APIRouter(tags=['data_entry'])
 
 
-@router.get('/', response_model=list[DataEntrySchema])
-async def data_entry_list(service: DataEntryServiceDep) -> Sequence[DataEntry]:
-    return await service.list()
+@router.get('/page_number_paginated')
+async def data_entry_page_number_paginated_list(
+    service: DataEntryServiceDep,
+    page_number_pagination: Annotated[
+        PageNumberPaginationParamsSchema, Query()
+    ],
+) -> PageNumberPaginatedResponseSchema[DataEntrySchema]:
+    return await service.page_number_paginated_list(
+        DataEntrySchema, page_number_pagination
+    )
 
 
-@router.post('/', response_model=DataEntrySchema)
+@router.post('/')
 async def data_entry_create(
     service: DataEntryServiceDep, data: DataEntryCreateSchema
-) -> DataEntry:
-    return await service.create(**data.model_dump())
+) -> DataEntrySchema:
+    return await service.create(DataEntrySchema, data)
