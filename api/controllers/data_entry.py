@@ -4,6 +4,8 @@ from fastapi import APIRouter, Query
 
 from api.deps import DataEntryServiceDep
 from api.schemas import (
+    CursorPaginatedResponseSchema,
+    CursorPaginationParamsSchema,
     DataEntryCreateSchema,
     DataEntrySchema,
     PageNumberPaginatedResponseSchema,
@@ -22,6 +24,16 @@ async def data_entry_page_number_paginated_list(
 ) -> PageNumberPaginatedResponseSchema[DataEntrySchema]:
     return await service.page_number_paginated_list(
         DataEntrySchema, page_number_pagination
+    )
+
+
+@router.get('/cursor-paginated')
+async def data_entry_cursor_paginated_list(
+    service: DataEntryServiceDep,
+    cursor_pagination: Annotated[CursorPaginationParamsSchema, Query()],
+) -> CursorPaginatedResponseSchema[DataEntrySchema]:
+    return await service.cursor_paginated_list(
+        DataEntrySchema, cursor_pagination
     )
 
 

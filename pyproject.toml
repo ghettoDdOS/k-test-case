@@ -11,6 +11,7 @@ dependencies = [
   "greenlet>=3.2.3",
   "httptools>=0.6.4",
   "pydantic-settings>=2.9.1",
+  "sqlakeyset>=2.0.1746777265",
   "sqlalchemy>=2.0.41",
   "uvicorn>=0.34.3",
   "uvloop>=0.21.0 ; sys_platform != 'win32'",

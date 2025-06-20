@@ -5,7 +5,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.db import Model
-from api.pagination import PageNumberPaginatedData, PageNumberPaginator
+from api.pagination import (
+    CursorPaginatedData,
+    CursorPaginator,
+    PageNumberPaginatedData,
+    PageNumberPaginator,
+)
 
 
 class Repository[T: Model]:
@@ -27,6 +32,20 @@ class Repository[T: Model]:
         paginator = PageNumberPaginator(self._db_session)
 
         return await paginator.paginate(query, page_size=page_size, page=page)
+
+    async def cursor_paginated_list(
+        self,
+        *,
+        cursor: str | None,
+        page_size: int,
+    ) -> CursorPaginatedData[T]:
+        query = select(self.model, self.model.pk)
+
+        paginator = CursorPaginator(self._db_session)
+
+        return await paginator.paginate(
+            query, page_size=page_size, cursor=cursor
+        )
 
     async def create(self, **kwargs: Mapping[str, Any]) -> T:
         instance = self.model(**kwargs)
