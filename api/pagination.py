@@ -1,8 +1,17 @@
 from abc import ABC, abstractmethod
+from base64 import b64decode, b64encode
 from math import ceil
 from typing import Any, ClassVar, TypedDict, Unpack, override
 
-from sqlalchemy import Select, func, select
+from sqlakeyset import Page, serialize_bookmark, unserialize_bookmark
+from sqlakeyset.asyncio import select_page
+from sqlakeyset.types import MarkerLike
+from sqlalchemy import (
+    Row,
+    Select,
+    func,
+    select,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import lazyload
 
@@ -32,8 +41,12 @@ class BasePaginator(ABC):
     def __init__(self, db_session: AsyncSession) -> None:
         self._db_session = db_session
 
-    @abstractmethod
-    async def _get_count(self, query: Select[Any]) -> int: ...
+    async def _get_count(self, query: Select[Any]) -> int:
+        subquery = query.options(lazyload('*')).order_by(None).subquery()
+        result = await self._db_session.execute(
+            select(func.count()).select_from(subquery)
+        )
+        return result.scalars().one()
 
     @abstractmethod
     async def paginate[T: Model](
@@ -52,20 +65,6 @@ class PageNumberPaginationParams[T](BasePaginationParams[T]):
 
 
 class PageNumberPaginator(BasePaginator):
-    @override
-    async def _get_count(self, query: Select[Any]) -> int:
-        return (
-            (
-                await self._db_session.execute(
-                    select(func.count()).select_from(
-                        query.options(lazyload('*')).order_by(None).subquery()
-                    )
-                )
-            )
-            .scalars()
-            .one()
-        )
-
     @override
     async def paginate[T: Model](
         self,
@@ -109,4 +108,66 @@ class PageNumberPaginator(BasePaginator):
             count=count,
             next=next_page,
             previous=previous_page,
+        )
+
+
+class CursorPaginatedData[T](BasePaginatedData[T]):
+    next: str | None
+    previous: str | None
+
+
+class CursorPaginationParams[T](BasePaginationParams[T]):
+    cursor: str | None
+
+
+def _decode_cursor(encoded: str | None) -> MarkerLike:
+    if encoded is None:
+        return (None, False)
+    return unserialize_bookmark(
+        b64decode(encoded.encode('ascii')).decode('ascii')
+    )
+
+
+def _encode_cursor(cursor: MarkerLike) -> str:
+    return b64encode(serialize_bookmark(cursor).encode('ascii')).decode(
+        'ascii'
+    )
+
+
+class CursorPaginator(BasePaginator):
+    default_error_messages: ClassVar[dict[str, str]] = {
+        **BasePaginator.default_error_messages,
+        'invalid_cursor': 'Невалидный курсор',
+    }
+
+    @override
+    async def paginate[T: Model](
+        self, query: Select[Any], **kwargs: Unpack[CursorPaginationParams[T]]
+    ) -> CursorPaginatedData[T]:
+        encoded_cursor, page_size = kwargs['cursor'], kwargs['page_size']
+
+        try:
+            cursor = _decode_cursor(encoded_cursor)
+        except ValueError as exc:
+            raise PaginationError(
+                self.default_error_messages['invalid_cursor']
+            ) from exc
+
+        if (
+            model := get_default_model(query)
+        ) is not None and not get_query_ordering(query):
+            query = query.order_by(model.pk.asc())
+
+        page: Page[Row[tuple[T, int]]] = await select_page(
+            self._db_session, query, per_page=page_size, page=cursor
+        )
+
+        return CursorPaginatedData(
+            results=[row[0] for row in page.paging.rows],
+            next=_encode_cursor(page.paging.next)
+            if page.paging.has_next
+            else None,
+            previous=_encode_cursor(page.paging.previous)
+            if page.paging.has_previous
+            else None,
         )

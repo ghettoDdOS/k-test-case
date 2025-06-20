@@ -26,9 +26,16 @@ class DataEntryCreateSchema(BaseDataEntrySchema):
     pass
 
 
-class PageNumberPaginationParamsSchema(BaseModel):
-    page: Annotated[int, Field(ge=1)] = 1
+class BasePaginationParamsSchema(BaseModel):
     page_size: Annotated[int, Field(ge=10, le=1000)] = 100
+
+
+class PageNumberPaginationParamsSchema(BasePaginationParamsSchema):
+    page: Annotated[int, Field(ge=1)] = 1
+
+
+class CursorPaginationParamsSchema(BasePaginationParamsSchema):
+    cursor: str | None = None
 
 
 class BasePaginationResponseSchema[T](BaseModel):
@@ -39,3 +46,8 @@ class PageNumberPaginatedResponseSchema[T](BasePaginationResponseSchema[T]):
     count: int
     next: int | None
     previous: int | None
+
+
+class CursorPaginatedResponseSchema[T](BasePaginationResponseSchema[T]):
+    next: str | None
+    previous: str | None
