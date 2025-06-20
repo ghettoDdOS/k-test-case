@@ -1,6 +1,5 @@
 {
   // Disable the default formatter, use eslint instead
-  "prettier.enable": false,
   "editor.formatOnSave": false,
 
   // Auto fix
@@ -41,5 +40,9 @@
     "scss",
     "pcss",
     "postcss"
-  ]
+  ],
+
+  "[python]": {
+    "editor.formatOnSave": true
+  }
 }

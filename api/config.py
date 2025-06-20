@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def DATABASE_URL(self) -> PostgresDsn:
+    def DATABASE_URL(self) -> PostgresDsn:  # noqa: N802
         return PostgresDsn.build(
             scheme='postgresql+asyncpg',
             username=self.DATABASE_USER,
@@ -31,6 +31,8 @@ class Settings(BaseSettings):
             port=self.DATABASE_PORT,
             path=self.DATABASE_NAME,
         )
+
+    QUERY_LOGGER: bool = False
 
 
 settings = Settings()

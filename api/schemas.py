@@ -30,3 +30,18 @@ class DataEntrySchema(BaseDataEntrySchema):
 
 class DataEntryCreateSchema(BaseDataEntrySchema):
     pass
+
+
+class PageNumberPaginationParamsSchema(BaseModel):
+    page: Annotated[int, Field(ge=1)] = 1
+    page_size: Annotated[int, Field(ge=10, le=1000)] = 100
+
+
+class BasePaginationResponseSchema[T](BaseModel):
+    results: list[T]
+
+
+class PageNumberPaginatedResponseSchema[T](BasePaginationResponseSchema[T]):
+    count: int
+    next: int | None
+    previous: int | None

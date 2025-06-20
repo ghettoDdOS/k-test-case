@@ -6,16 +6,15 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from api import models
 from api.config import settings
-from api.db import Model
-from api.models import *
 
 logger = logging.getLogger(__name__)
 
 config = context.config
 
 
-target_metadata = Model.metadata
+target_metadata = models.Model.metadata
 
 config.set_main_option('sqlalchemy.url', str(settings.DATABASE_URL))
 

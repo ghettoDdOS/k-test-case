@@ -1,21 +1,27 @@
-from fastapi import APIRouter
+from typing import Annotated
 
-from api.deps import CursorDep, DataEntryServiceDep
+from fastapi import APIRouter, Query
+
+from api.deps import DataEntryServiceDep
 from api.schemas import (
     DataEntryCreateSchema,
     DataEntrySchema,
-    PaginatedResponseSchema,
+    PageNumberPaginatedResponseSchema,
+    PageNumberPaginationParamsSchema,
 )
 
 router = APIRouter(tags=['data_entry'])
 
 
-@router.get('/')
-async def data_entry_list(
-    service: DataEntryServiceDep, cursor: CursorDep, page_size: int = 100
-) -> PaginatedResponseSchema[DataEntrySchema]:
-    return await service.list(
-        DataEntrySchema, cursor=cursor, page_size=page_size
+@router.get('/page_number_paginated')
+async def data_entry_page_number_paginated_list(
+    service: DataEntryServiceDep,
+    page_number_pagination: Annotated[
+        PageNumberPaginationParamsSchema, Query()
+    ],
+) -> PageNumberPaginatedResponseSchema[DataEntrySchema]:
+    return await service.page_number_paginated_list(
+        DataEntrySchema, page_number_pagination
     )
 
 
@@ -23,4 +29,4 @@ async def data_entry_list(
 async def data_entry_create(
     service: DataEntryServiceDep, data: DataEntryCreateSchema
 ) -> DataEntrySchema:
-    return await service.create(DataEntrySchema, **data.model_dump())
+    return await service.create(DataEntrySchema, data)
