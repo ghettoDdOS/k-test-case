@@ -1,5 +1,3 @@
-import type { QueryParams } from '../api'
-
 interface BasePaginatedData<T> {
   results: T[]
 }

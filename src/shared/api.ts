@@ -4,7 +4,7 @@ type QueryParamValue = number | string | number[] | string[]
 type QueryParams = Record<string, QueryParamValue>
 interface RequestOptions {
   params?: QueryParams
-  signal?:AbortSignal
+  signal?: AbortSignal
 }
 
 interface ApiClient {
@@ -45,9 +45,9 @@ function createApiClient(options: ApiClientOptions = {}): ApiClient {
   }
 
   const request = async <T>(url: string, options: RequestOptions = {}) => {
-    const { params,signal } = options
+    const { params, signal } = options
 
-    const response = await fetch(resolveUrl(url, params),{signal})
+    const response = await fetch(resolveUrl(url, params), { signal })
     if (!response.ok)
       throw new ApiError(response)
     const data = response.json()

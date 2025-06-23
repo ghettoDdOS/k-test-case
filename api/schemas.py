@@ -3,6 +3,9 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
+from api.filtering import create_model_filters_schema
+from api.models import DataEntry
+
 
 class ModelSchema(BaseModel):
     model_config = {'from_attributes': True, 'validate_by_alias': False}
@@ -51,3 +54,34 @@ class PageNumberPaginatedResponseSchema[T](BasePaginationResponseSchema[T]):
 class CursorPaginatedResponseSchema[T](BasePaginationResponseSchema[T]):
     next: str | None
     previous: str | None
+
+
+class OrderingParamsSchema(BaseModel):
+    ordering: list[str] | None = None
+
+
+class CommonPageNumberPaginatedParams(
+    OrderingParamsSchema, PageNumberPaginationParamsSchema
+):
+    pass
+
+
+class CommonCursorPaginatedParams(
+    OrderingParamsSchema, CursorPaginationParamsSchema
+):
+    pass
+
+
+DataEntryFiltersSchema = create_model_filters_schema(DataEntry)
+
+
+class DataEntryPageNumberPaginatedListParams(
+    CommonPageNumberPaginatedParams, DataEntryFiltersSchema
+):
+    pass
+
+
+class DataEntryCursorPaginatedListParams(
+    CommonCursorPaginatedParams, DataEntryFiltersSchema
+):
+    pass
