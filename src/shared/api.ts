@@ -1,6 +1,6 @@
 import { joinUrl } from './lib/url'
 
-type QueryParamValue = number | string | number[] | string[]
+type QueryParamValue = number | string | number[] | string[] | undefined
 type QueryParams = Record<string, QueryParamValue>
 interface RequestOptions {
   params?: QueryParams
@@ -22,9 +22,22 @@ class ApiError extends Error {
   }
 }
 
+function stripUndefined(obj: object) {
+  const copy: Record<string, unknown> = { ...obj }
+  for (const [k, v] of Object.entries(copy)) {
+    if (v === undefined)
+      delete copy[k]
+  }
+  return copy
+}
+
 function serializeQueryParams(params: QueryParams): string {
-  const serializedParams = Object.entries(params).map(([key, value]) => {
-    return [key, JSON.stringify(value)]
+  const serializedParams = Object.entries(
+    stripUndefined(params),
+  ).flatMap(([key, value]) => {
+    if (Array.isArray(value))
+      return value.map(v => [key, String(v)])
+    return [[key, String(value)]]
   })
   return new URLSearchParams(serializedParams).toString()
 }

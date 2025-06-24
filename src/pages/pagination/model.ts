@@ -1,56 +1,62 @@
-import type { DataEntry } from '@/app/entities/data-entry'
-import type { PageNumberPaginatedData } from '@/shared/lib/pagination'
+import type { DataEntry } from '@/entities/data-entry'
+import type { PageNumberPaginatedDataEntryListParams } from '@/entities/data-entry/api'
+import type { FilteringParams } from '@/shared/lib/filters'
+import type { OrderingParams } from '@/shared/lib/ordering'
+import type { PageNumberPaginationParams } from '@/shared/lib/pagination'
 
-import { makeAutoObservable, reaction, runInAction } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 
-import { getPageNumberPaginatedDataEntryList } from '@/app/entities/data-entry'
+import { getPageNumberPaginatedDataEntryList } from '@/entities/data-entry'
 import { LRUCache } from '@/shared/lib/cache'
 
-class DataEntryPageNumberPaginatedStore {
-  pages: LRUCache<DataEntry[]> = new LRUCache(3)
+function makeKey(input: unknown): string {
+  return JSON.stringify(input)
+}
 
-  page: number = 1
-  pageSize: number = 1000
+class DataEntryPageNumberPaginatedStore {
+  private cache: LRUCache<DataEntry[]>
+  private currentCacheKey?: string
 
   count: number = 0
-
   loading: boolean = true
 
   constructor() {
     makeAutoObservable(this)
-
-    reaction(
-      () => this.page,
-      (page) => { void this.ensurePageData(page) },
-      { fireImmediately: true },
-    )
-    reaction(
-      () => this.pageSize,
-      () => {
-        this.pages = new LRUCache(3)
-        this.page = 1
-      },
-    )
+    this.cache = new LRUCache(3)
   }
 
   get data() {
-    return this.pages.get(this.page) ?? []
+    if (this.currentCacheKey == null)
+      return
+    return this.cache.get(this.currentCacheKey)
   }
 
-  async ensurePageData(page: number) {
-    if (this.pages.has(page))
+  async fetchPage(
+    pagination: PageNumberPaginationParams,
+    ordering?: OrderingParams,
+    filters?: Partial<FilteringParams<DataEntry>>,
+  ) {
+    const params: PageNumberPaginatedDataEntryListParams = {
+      ...pagination,
+      ...ordering,
+      ...filters,
+    }
+    const cacheKey = makeKey(params)
+    if (this.cache.has(cacheKey)) {
+      runInAction(() => {
+        this.currentCacheKey = cacheKey
+      })
       return
-
+    }
     this.loading = true
     try {
-      const data = await getPageNumberPaginatedDataEntryList({
-        params: {
-          page,
-          pageSize: this.pageSize,
-        },
+      const result = await getPageNumberPaginatedDataEntryList({
+        params,
       })
       runInAction(() => {
-        this.setPageData(page, data)
+        this.cache.set(cacheKey, result.results)
+        this.count = result.count
+        this.currentCacheKey = cacheKey
       })
     }
     catch (error) {
@@ -61,19 +67,6 @@ class DataEntryPageNumberPaginatedStore {
         this.loading = false
       })
     }
-  }
-
-  private setPageData(page: number, data: PageNumberPaginatedData<DataEntry>) {
-    this.count = data.count
-    this.pages.set(page, data.results)
-  }
-
-  setPage(page: number) {
-    this.page = page
-  }
-
-  setPageSize(pageSize: number) {
-    this.pageSize = pageSize
   }
 }
 

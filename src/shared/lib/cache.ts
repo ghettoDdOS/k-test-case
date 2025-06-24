@@ -1,5 +1,3 @@
-import { action, makeObservable, observable } from 'mobx'
-
 class LRUCache<T = unknown> {
   private maxSize: number
   data: Map<PropertyKey, T>
@@ -7,12 +5,6 @@ class LRUCache<T = unknown> {
   constructor(maxSize: number) {
     this.maxSize = maxSize
     this.data = new Map<PropertyKey, T>()
-
-    makeObservable(this, {
-      data: observable,
-
-      set: action,
-    })
   }
 
   get(key: PropertyKey) {

@@ -8,6 +8,11 @@ interface PageNumberPaginatedData<T> extends BasePaginatedData<T> {
   previous: number | null
 }
 
+interface CursorPaginatedData<T> extends BasePaginatedData<T> {
+  next: string | null
+  previous: string | null
+}
+
 interface PageNumberPaginationParamsDto {
   page: number
   page_size: number
@@ -15,6 +20,15 @@ interface PageNumberPaginationParamsDto {
 
 interface PageNumberPaginationParams {
   page: number
+  pageSize: number
+}
+
+interface CursorPaginationParamsDto {
+  cursor?: string
+  page_size: number
+}
+interface CursorPaginationParams {
+  cursor?: string
   pageSize: number
 }
 
@@ -36,12 +50,24 @@ function mapPageNumberPaginationParamsToDto(
   }
 }
 
+function mapCursorPaginationParamsToDto(
+  obj: CursorPaginationParams,
+): CursorPaginationParamsDto {
+  return {
+    cursor: obj.cursor,
+    page_size: obj.pageSize,
+  }
+}
+
 export {
+  mapCursorPaginationParamsToDto,
   mapPageNumberPaginationParamsDto,
   mapPageNumberPaginationParamsToDto,
 }
 export type {
+  CursorPaginatedData,
+  CursorPaginationParams,
   PageNumberPaginatedData,
   PageNumberPaginationParams,
-  PageNumberPaginationParamsDto,
+  PageNumberPaginationParamsDto,CursorPaginationParamsDto
 }

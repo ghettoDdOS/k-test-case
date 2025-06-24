@@ -31,6 +31,8 @@ class DatabaseService[T: Model]:
     def _validate_model_field(
         self, field_name: str
     ) -> ColumnExpressionArgument[Any]:
+        if field_name == 'id':
+            field_name = 'pk'
         col = self._repository.model.__table__.columns.get(field_name)
         if col is None:
             raise HTTPException(

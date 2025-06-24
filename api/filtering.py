@@ -14,6 +14,7 @@ FILTERING_OPS = {
     'eq': operators.eq,
     'gt': operators.gt,
     'lt': operators.lt,
+    'icontains': operators.icontains_op,
 }
 
 
