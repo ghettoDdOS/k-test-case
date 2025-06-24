@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=k-test-case
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    healthcheck:
+      test: pg_isready -U postgres -d k-test-case
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: 'ghcr.io/ghettoddos/k-test-case'
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_NAME: k-test-case
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      ALLOWED_HOST: ${ALLOWED_HOST}
+
+volumes:
+  postgres-data:
+
