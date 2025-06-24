@@ -123,15 +123,11 @@ class CursorPaginationParams[T](BasePaginationParams[T]):
 def _decode_cursor(encoded: str | None) -> MarkerLike:
     if encoded is None:
         return (None, False)
-    return unserialize_bookmark(
-        b64decode(encoded.encode('ascii')).decode('ascii')
-    )
+    return unserialize_bookmark(b64decode(encoded.encode()).decode())
 
 
 def _encode_cursor(cursor: MarkerLike) -> str:
-    return b64encode(serialize_bookmark(cursor).encode('ascii')).decode(
-        'ascii'
-    )
+    return b64encode(serialize_bookmark(cursor).encode()).decode()
 
 
 class CursorPaginator(BasePaginator):

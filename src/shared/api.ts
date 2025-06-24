@@ -1,6 +1,11 @@
 import { joinUrl } from './lib/url'
 
-interface RequestOptions {}
+type QueryParamValue = number | string | number[] | string[] | undefined
+type QueryParams = Record<string, QueryParamValue>
+interface RequestOptions {
+  params?: QueryParams
+  signal?: AbortSignal
+}
 
 interface ApiClient {
   get: <T>(url: string, options?: RequestOptions) => Promise<T>
@@ -17,17 +22,45 @@ class ApiError extends Error {
   }
 }
 
+function stripUndefined(obj: object) {
+  const copy: Record<string, unknown> = { ...obj }
+  for (const [k, v] of Object.entries(copy)) {
+    if (v === undefined)
+      delete copy[k]
+  }
+  return copy
+}
+
+function serializeQueryParams(params: QueryParams): string {
+  const serializedParams = Object.entries(
+    stripUndefined(params),
+  ).flatMap(([key, value]) => {
+    if (Array.isArray(value))
+      return value.map(v => [key, String(v)])
+    return [[key, String(value)]]
+  })
+  return new URLSearchParams(serializedParams).toString()
+}
+
 function createApiClient(options: ApiClientOptions = {}): ApiClient {
   const { baseUrl } = options
 
-  const resolveUrl = (url: string) => {
+  const resolveUrl = (url: string, params?: QueryParams) => {
+    let resolvedUrl = url
     if (baseUrl != null)
-      return joinUrl(baseUrl, url)
-    return url
+      resolvedUrl = joinUrl(baseUrl, url)
+
+    if (params) {
+      resolvedUrl += `?${serializeQueryParams(params)}`
+    }
+
+    return resolvedUrl
   }
 
-  const request = async <T>(url: string) => {
-    const response = await fetch(resolveUrl(url))
+  const request = async <T>(url: string, options: RequestOptions = {}) => {
+    const { params, signal } = options
+
+    const response = await fetch(resolveUrl(url, params), { signal })
     if (!response.ok)
       throw new ApiError(response)
     const data = response.json()
@@ -35,7 +68,7 @@ function createApiClient(options: ApiClientOptions = {}): ApiClient {
   }
 
   return {
-    get: async url => request(url),
+    get: async (url, options) => request(url, options),
   }
 }
 
@@ -44,5 +77,5 @@ const api = createApiClient({
 })
 
 export default api
-export type { RequestOptions }
+export type { QueryParams, RequestOptions }
 export { ApiError }

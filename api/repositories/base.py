@@ -1,16 +1,36 @@
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import Select, UnaryExpression, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.db import Model
+from api.filtering import resolve_filters
 from api.pagination import (
     CursorPaginatedData,
     CursorPaginator,
     PageNumberPaginatedData,
     PageNumberPaginator,
 )
+
+
+def apply_ordering(
+    query: Select[Any],
+    ordering: Sequence[UnaryExpression[Any]] | None = None,
+) -> Select[Any]:
+    if not ordering:
+        return query
+    return query.order_by(*ordering)
+
+
+def apply_filters(
+    query: Select[Any],
+    filters: dict[str, Any] | None = None,
+) -> Select[Any]:
+    if not filters:
+        return query
+    clauses = resolve_filters(filters)
+    return query.where(*clauses)
 
 
 class Repository[T: Model]:
@@ -26,8 +46,12 @@ class Repository[T: Model]:
         *,
         page: int,
         page_size: int,
+        ordering: Sequence[UnaryExpression[Any]] | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> PageNumberPaginatedData[T]:
-        query = select(self.model, self.model.pk)
+        query = apply_ordering(
+            apply_filters(select(self.model), filters), ordering
+        )
 
         paginator = PageNumberPaginator(self._db_session)
 
@@ -38,8 +62,12 @@ class Repository[T: Model]:
         *,
         cursor: str | None,
         page_size: int,
+        ordering: Sequence[UnaryExpression[Any]] | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> CursorPaginatedData[T]:
-        query = select(self.model, self.model.pk)
+        query = apply_ordering(
+            apply_filters(select(self.model), filters), ordering
+        )
 
         paginator = CursorPaginator(self._db_session)
 
